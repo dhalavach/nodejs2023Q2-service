@@ -1,0 +1,50 @@
+version: '3.9'
+services:
+  app:
+    container_name: homelibservice-app
+    image: kopfmann/homelib-multiarch
+    restart: always
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - postgres
+    volumes:
+      - ./src:/app/src
+    env_file:
+      - .env
+    networks:
+      - ${NETWORK}
+
+  postgres:
+    container_name: homelibservice-db
+    image: kopfmann/homelib-db-multiarch
+    restart: always
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    env_file:
+      - .env
+    volumes:
+      - /var/lib/postgresql/data
+    command:
+      [
+        'postgres',
+        '-c',
+        'logging_collector=on',
+        '-c',
+        'log_directory=./',
+        '-c',
+        'log_filename=postgres.log',
+        '-c',
+        'log_statement=all',
+      ]
+    networks:
+      - ${NETWORK}
+
+networks:
+  library-service:
+    driver: bridge
+    name: ${NETWORK}
+
+volumes:
+  app:
+  postgres:
